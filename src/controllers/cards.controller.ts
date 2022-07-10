@@ -51,3 +51,17 @@ export async function blockCard(req:Request,res:Response) {
     const cardBlocked = await cardRepository.update(checkCardExist.id,{...checkCardExist,isBlocked:true})
     res.status(200).send(cardBlocked)
 }
+
+export async function desblockCard(req:Request,res:Response) {
+        //FALTA VALIDAR A VALIDADE DO CARTÃO (data de expirar o cartão)
+      //VALIDAR OS ITENS
+      const{cardNumber,cardName,expirationDate,password } = req.body
+
+      const checkCardExist = await cardRepository.findByCardDetails(cardNumber,cardName,expirationDate)
+      if(!checkCardExist) res.status(404).send(`Card do not exist.`)
+      if(!checkCardExist.isBlocked) res.status(404).send(`Card do not blocked.`)
+      if(!checkCardExist.password) res.status(404).send(`Card do not actived.`)
+      if(password !== desencrypt(checkCardExist.password))res.status(404).send(`Password incorrect.`)
+      const cardBlocked = await cardRepository.update(checkCardExist.id,{...checkCardExist,isBlocked:false})
+      res.status(200).send(cardBlocked)
+}
