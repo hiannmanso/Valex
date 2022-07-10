@@ -1,7 +1,8 @@
 import { application, Request, Response } from "express";
 import cardRepository from "../repositories/cardRepository.js";
 import employeeRepository from "../repositories/employeeRepository.js";
-import { generatorInfosCards } from "../services/cardsService.js";
+import { generatorInfosCards, verifyCvc } from "../services/cardsService.js";
+import {desencrypt, encrypt} from "../utils/encryptThings.js";
 import companyRepository from './../repositories/companyRepository.js'
 
 
@@ -23,11 +24,30 @@ export async function createNewCardPOST(req:Request,res:Response) {
 }
 
 export async function activeCardUPDATE(req:Request,res:Response) {
+    //FALTA VALIDAR A VALIDADE DO CARTÃO (data de expirar o cartão)
+    //VALIDAR OS ITENS
     const {idUser,cvc,password,type}= req.body
 
     const checkCardExist = await cardRepository.findByTypeAndEmployeeId(type,idUser)
     if(!checkCardExist) res.status(404).send(`Card not found`)
-    console.log(checkCardExist)
+    if(checkCardExist.password) res.status(404).send(`Card already actived`)
+    const checkCvc = verifyCvc(cvc,checkCardExist.securityCode)
+    if(checkCvc) res.status(404).send(`CVC do not match`) // USAR THROW
+    const encryptedPassword = encrypt(password)
+    const result  = await cardRepository.update(checkCardExist.id,{...checkCardExist,password:encryptedPassword})
+    res.status(200).send(result)
+}
 
-    res.status(200).send(checkCardExist)
+export async function blockCard(req:Request,res:Response) {
+      //FALTA VALIDAR A VALIDADE DO CARTÃO (data de expirar o cartão)
+      //VALIDAR OS ITENS
+    const{cardNumber,cardName,expirationDate,password } = req.body
+
+    const checkCardExist = await cardRepository.findByCardDetails(cardNumber,cardName,expirationDate)
+    if(!checkCardExist) res.status(404).send(`Card do not exist.`)
+    if(checkCardExist.isBlocked) res.status(404).send(`Card already blocked.`)
+    if(!checkCardExist.password) res.status(404).send(`Card do not actived.`)
+    if(password !== desencrypt(checkCardExist.password))res.status(404).send(`Password incorrect.`)
+    const cardBlocked = await cardRepository.update(checkCardExist.id,{...checkCardExist,isBlocked:true})
+    res.status(200).send(cardBlocked)
 }

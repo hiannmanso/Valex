@@ -2,6 +2,7 @@ import {faker} from '@faker-js/faker'
 import dayjs from 'dayjs'
 import Cryptr from 'cryptr'
 import cardRepository, { TransactionTypes } from '../repositories/cardRepository.js'
+import {encrypt} from '../utils/encryptThings.js'
 
 export function generatorInfosCards(userName:string,employeeId:number,type:TransactionTypes) {
     const cryptr = new Cryptr('123')
@@ -11,8 +12,8 @@ export function generatorInfosCards(userName:string,employeeId:number,type:Trans
     const year = dayjs().year()
     const expirationDate = dayjs().set('year',Number(year) + 5).format('MM/YY')
     const cvc = faker.finance.creditCardCVV();
-    const cryptedCVC= cryptr.encrypt(cvc)
-    
+    // const cryptedCVC= cryptr.encrypt(cvc)
+    const cryptedCVC = encrypt(cvc)
     const infoCard = {
         employeeId,
         number:creditCardNumber,
@@ -52,4 +53,11 @@ function geratorNameOnCard(userName:string) {
         
     }
     return nameOnCard.join(' ').toUpperCase()
+}
+
+export function verifyCvc(cvc:string,securityCode:string) {
+    const cryptr = new Cryptr('123')
+    if(cvc !== cryptr.decrypt(securityCode)){
+        return true
+    }
 }
