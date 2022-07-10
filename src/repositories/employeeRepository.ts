@@ -8,7 +8,7 @@ export interface Employee {
   companyId: number;
 }
 
-export async function findById(id: number) {
+async function findById(id: number) {
   const result = await connection.query<Employee, [number]>(
     "SELECT * FROM employees WHERE id=$1",
     [id]
@@ -16,3 +16,10 @@ export async function findById(id: number) {
 
   return result.rows[0];
 }
+
+const employeeRepository ={
+  findById,
+
+}
+
+export default employeeRepository

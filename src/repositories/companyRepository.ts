@@ -6,7 +6,7 @@ export interface Company {
   apiKey?: string;
 }
 
-export async function findByApiKey(apiKey: string) {
+ async function findByApiKey(apiKey: string) {
   const result = await connection.query<Company, [string]>(
     `SELECT * FROM companies WHERE "apiKey"=$1`,
     [apiKey]
@@ -14,3 +14,9 @@ export async function findByApiKey(apiKey: string) {
 
   return result.rows[0];
 }
+
+const companyRepository ={
+  findByApiKey,
+}
+export default companyRepository
+

@@ -1,5 +1,5 @@
 import { connection } from "../../database.js";
-import { mapObjectToUpdateQuery } from "../../utils/sqlUtils.js";
+import { mapObjectToUpdateQuery } from "../utils/sqlUtils.js";
 
 export type TransactionTypes =
   | "groceries"
@@ -25,12 +25,12 @@ export interface Card {
 export type CardInsertData = Omit<Card, "id">;
 export type CardUpdateData = Partial<Card>;
 
-export async function find() {
+ async function find() {
   const result = await connection.query<Card>("SELECT * FROM cards");
   return result.rows;
 }
 
-export async function findById(id: number) {
+ async function findById(id: number) {
   const result = await connection.query<Card, [number]>(
     "SELECT * FROM cards WHERE id=$1",
     [id]
@@ -39,7 +39,7 @@ export async function findById(id: number) {
   return result.rows[0];
 }
 
-export async function findByTypeAndEmployeeId(
+ async function findByTypeAndEmployeeId(
   type: TransactionTypes,
   employeeId: number
 ) {
@@ -51,13 +51,13 @@ export async function findByTypeAndEmployeeId(
   return result.rows[0];
 }
 
-export async function findByCardDetails(
+ async function findByCardDetails(
   number: string,
   cardholderName: string,
   expirationDate: string
 ) {
   const result = await connection.query<Card, [string, string, string]>(
-    ` SELECT 
+    `SELECT 
         * 
       FROM cards 
       WHERE number=$1 AND "cardholderName"=$2 AND "expirationDate"=$3`,
@@ -67,7 +67,7 @@ export async function findByCardDetails(
   return result.rows[0];
 }
 
-export async function insert(cardData: CardInsertData) {
+ async function insert(cardData: CardInsertData) {
   const {
     employeeId,
     number,
@@ -82,8 +82,7 @@ export async function insert(cardData: CardInsertData) {
   } = cardData;
 
   connection.query(
-    `
-    INSERT INTO cards ("employeeId", number, "cardholderName", "securityCode",
+    `INSERT INTO cards ("employeeId", number, "cardholderName", "securityCode",
       "expirationDate", password, "isVirtual", "originalCardId", "isBlocked", type)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
   `,
@@ -102,7 +101,7 @@ export async function insert(cardData: CardInsertData) {
   );
 }
 
-export async function update(id: number, cardData: CardUpdateData) {
+ async function update(id: number, cardData: CardUpdateData) {
   const { objectColumns: cardColumns, objectValues: cardValues } =
     mapObjectToUpdateQuery({
       object: cardData,
@@ -119,6 +118,18 @@ export async function update(id: number, cardData: CardUpdateData) {
   );
 }
 
-export async function remove(id: number) {
+ async function remove(id: number) {
   connection.query<any, [number]>("DELETE FROM cards WHERE id=$1", [id]);
 }
+
+
+const cardRepository = {
+  find,
+  findByCardDetails,
+  findById,
+  findByTypeAndEmployeeId,
+  insert,
+  remove,
+  update,
+}
+export default cardRepository
