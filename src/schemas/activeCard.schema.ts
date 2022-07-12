@@ -1,10 +1,12 @@
 import joi from 'joi'
 
 
-const newCardSchema = joi.object({
+const activeCardSchema = joi.object({
     idUser: joi.number().required(),
+    cvc:joi.string().required().min(3).max(3),
+
     cardType: joi.string().valid('groceries', 'restaurants', 'transport', 'education', 'health').required(),
-    userName:joi.string().pattern(/^[a-zA-ZãÃÇ-Üá-ú ]*$/i)
+    password:joi.string().required().max(4).min(4),
 })
 
-export default newCardSchema
+export default activeCardSchema
