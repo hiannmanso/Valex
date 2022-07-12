@@ -3,7 +3,7 @@ import { ObjectSchema } from "joi";
 
 export  function validateSchema(schema:ObjectSchema) {
    return ((req: Request,res:Response,next:NextFunction) =>{
-
+    
     const {error} = schema.validate(req.body)
     if (error){
         return res

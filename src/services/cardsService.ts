@@ -12,7 +12,7 @@ export function generatorInfosCards(userName:string,employeeId:number,type:Trans
     const year = dayjs().year()
     const expirationDate = dayjs().set('year',Number(year) + 5).format('MM/YY')
     const cvc = faker.finance.creditCardCVV();
-    // const cryptedCVC= cryptr.encrypt(cvc)
+    
     const cryptedCVC = encrypt(cvc)
     const infoCard = {
         employeeId,

@@ -10,7 +10,7 @@ export interface Payment {
 export type PaymentWithBusinessName = Payment & { businessName: string };
 export type PaymentInsertData = Omit<Payment, "id" | "timestamp">;
 
-export async function findByCardId(cardId: number) {
+ async function findByCardId(cardId: number) {
   const result = await connection.query<PaymentWithBusinessName, [number]>(
     `SELECT 
       payments.*,
@@ -25,7 +25,7 @@ export async function findByCardId(cardId: number) {
   return result.rows;
 }
 
-export async function insert(paymentData: PaymentInsertData) {
+ async function insert(paymentData: PaymentInsertData) {
   const { cardId, businessId, amount } = paymentData;
 
   connection.query<any, [number, number, number]>(
@@ -33,3 +33,11 @@ export async function insert(paymentData: PaymentInsertData) {
     [cardId, businessId, amount]
   );
 }
+
+
+const paymentRepository = {
+  findByCardId,
+  insert 
+}
+
+export default paymentRepository

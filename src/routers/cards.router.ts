@@ -1,5 +1,5 @@
 import {Router } from 'express'
-import { activeCardUPDATE, blockCard, createNewCardPOST, desblockCard } from '../controllers/cards.controller.js'
+import { activeCardUPDATE, balanceGET, blockCard, createNewCardPOST, desblockCard } from '../controllers/cards.controller.js'
 import { validateSchema } from '../middlewares/validateSchema.js'
 import newCardSchema from '../schemas/newCard.schema.js'
 
@@ -10,4 +10,5 @@ cardsRouter.post('/card/newCard',validateSchema(newCardSchema), createNewCardPOS
 cardsRouter.put('/card/activeCard',activeCardUPDATE)
 cardsRouter.put('/card/blockCard',blockCard)
 cardsRouter.put('/card/desblockCard',desblockCard)
+cardsRouter.get('/balance',balanceGET)
 export default cardsRouter
