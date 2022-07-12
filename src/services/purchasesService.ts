@@ -3,7 +3,7 @@ import cardRepository from "../repositories/cardRepository.js";
 import paymentRepository from "../repositories/paymentRepository.js";
 import rechargeRepository from "../repositories/rechargeRepository.js";
 import { desencrypt } from "../utils/encryptThings.js";
-
+import dayjs from "dayjs";
 
 export function verifyPassword(password:number,encryptedPassword:number) {
     if(password != desencrypt(encryptedPassword)){
@@ -19,6 +19,7 @@ export function verifyPassword(password:number,encryptedPassword:number) {
 export async function checkBalanceOnCard(cardId:number) {
     let balance = 0
     const checkValueInCard = await rechargeRepository.findByCardId(cardId)
+    
     for (const item of checkValueInCard) {
         balance += item.amount
     }
@@ -54,6 +55,13 @@ export async function purchase(cardId:number,password:number,businessId:number,a
             message:`Card is blocked`
         }
     }
+    const checkExpirationDate= dayjs(checkCard.expirationDate).isBefore(dayjs(Date.now()).format("MM-YY"))
+    if(checkExpirationDate){
+     throw{
+         status:400,
+         message:`Card expired.`
+     }
+    } 
     verifyPassword(password,checkCard.password)
     const checkBusiness = await businessesRepository.findById(businessId)
     if(!checkBusiness){

@@ -77,6 +77,13 @@ export async function newCard(apiKey:any,idUser:number,cardType:TransactionTypes
 
 export async function activeCard(idUser:number,cvc:string,password:number,type:TransactionTypes) {
    const checkCardExist = await validateExistCard(type,idUser,cvc)
+   const checkExpirationDate= dayjs(checkCardExist.expirationDate).isBefore(dayjs(Date.now()).format("MM-YY"))
+   if(checkExpirationDate){
+    throw{
+        status:400,
+        message:`Card expired.`
+    }
+   }
    const encryptedPassword = encrypt(password)
    const result  = await cardRepository.update(checkCardExist.id,{...checkCardExist,password:encryptedPassword})
    return result
@@ -85,6 +92,13 @@ export async function activeCard(idUser:number,cvc:string,password:number,type:T
 
 export async function blockCards(cardNumber:string,cardName:string,expirationDate:string,password:string) {
     const checkCardExist =  await validateExistCardByDetails(cardNumber,cardName,expirationDate)
+    const checkExpirationDate= dayjs(checkCardExist.expirationDate).isBefore(dayjs(Date.now()).format("MM-YY"))
+   if(checkExpirationDate){
+    throw{
+        status:400,
+        message:`Card expired.`
+    }
+   }
     console.log(desencrypt(checkCardExist.password))
     if(password != desencrypt(checkCardExist.password)){
         throw {
@@ -97,7 +111,14 @@ export async function blockCards(cardNumber:string,cardName:string,expirationDat
 }
 
 export async function desblockCards(cardNumber:string,cardName:string,expirationDate:string,password:string) {
-    const checkCardExist = await checkCard(cardNumber,cardName,expirationDate)    
+    const checkCardExist = await checkCard(cardNumber,cardName,expirationDate)   
+    const checkExpirationDate= dayjs(checkCardExist.expirationDate).isBefore(dayjs(Date.now()).format("MM-YY"))
+   if(checkExpirationDate){
+    throw{
+        status:400,
+        message:`Card expired.`
+    }
+   } 
     if(password != desencrypt(checkCardExist.password)){
         throw {
             status:404,

@@ -2,7 +2,7 @@ import cardRepository from "../repositories/cardRepository.js"
 import companyRepository from "../repositories/companyRepository.js"
 import employeeRepository from "../repositories/employeeRepository.js"
 import rechargeRepository from "../repositories/rechargeRepository.js"
-
+import dayjs from "dayjs"
 
 
 export async function recharge(apiKey:any,cardId,value,EmployeeId) {
@@ -46,5 +46,12 @@ export async function recharge(apiKey:any,cardId,value,EmployeeId) {
             message:`Card not active`
         }
     }
+    const checkExpirationDate= dayjs(checkCardValid.expirationDate).isBefore(dayjs(Date.now()).format("MM-YY"))
+    if(checkExpirationDate){
+     throw{
+         status:400,
+         message:`Card expired.`
+     }
+    } 
     await rechargeRepository.insert(rechargeValues)
 }
